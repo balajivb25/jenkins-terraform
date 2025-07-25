@@ -73,8 +73,8 @@ jobs:
           terraform_version: 1.6.6  # Set your Terraform version
       - name: Terraform Init
         run: terraform init
-      - name: Terraform Valdiate
-        run: terraform valdiate
+      - name: Terraform Validate
+        run: terraform validate
   plan:
     name: Terraform Plan
     runs-on: ${{ inputs.runner_type == 'self-hosted' && 'self-hosted' || 'ubuntu-latest' }}
