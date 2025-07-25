@@ -68,6 +68,13 @@ jobs:
       - run: echo "Running terraform apply"
       - name: Terraform Apply
         run: terraform apply -auto-approve
+      - name: Upload state file via SCP
+        run: |
+          scp -i ~/.ssh/id_rsa \
+          -o StrictHostKeyChecking=no \
+          terraform.tfstate \
+          ${{ secrets.SELF_HOST_USER }}@${{ secrets.SELF_HOST_IP }}:/home/${{ secrets.SELF_HOST_USER }}/projects/terraform-projects/git-push/tfstate/
+
 
   destroy:
     name: Terraform Destroy
