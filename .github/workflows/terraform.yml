@@ -35,6 +35,12 @@ jobs:
     if: ${{ github.event.inputs.action == 'init' }}
     steps:
       - run: echo "Running terraform init"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6  # Set your Terraform version
       - name: Terraform Init
         run: terraform init
 
@@ -44,6 +50,12 @@ jobs:
     if: ${{ github.event.inputs.action == 'fmt' }}
     steps:
       - run: echo "Running terraform fmt"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6  # Set your Terraform version
       - name: Terraform Format Check
         run: terraform fmt -recursive
 
@@ -53,6 +65,12 @@ jobs:
     if: ${{ github.event.inputs.action == 'valdiate' }}
     steps:
       - run: echo "Running terraform valdiate"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6  # Set your Terraform version
       - name: Terraform Valdiate
         run: terraform valdiate
   plan:
@@ -61,6 +79,12 @@ jobs:
     if: ${{ github.event.inputs.action == 'plan' }}
     steps:
       - run: echo "Running terraform plan"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
       - name: Terraform Plan
         run: terraform plan
 
@@ -70,6 +94,12 @@ jobs:
     if: ${{ github.event.inputs.action == 'apply' }}
     steps:
       - run: echo "Running terraform apply"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
       - name: Terraform Apply
         run: terraform apply -auto-approve
       - name: Upload state file via SCP
@@ -86,5 +116,11 @@ jobs:
     if: ${{ github.event.inputs.action == 'destroy' }}
     steps:
       - run: echo "Running terraform destroy"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
