@@ -10,6 +10,8 @@ on:
         type: choice
         options:
           - init
+          - fmt
+          - validate
           - plan
           - apply
           - destroy
@@ -21,13 +23,34 @@ jobs:
     if: ${{ github.event.inputs.action == 'init' }}
     steps:
       - run: echo "Running terraform init"
+      - name: Terraform Init
+        run: terraform init
 
+  fmt:
+    name: Terraform fmt
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.action == 'fmt' }}
+    steps:
+      - run: echo "Running terraform fmt"
+      - name: Terraform Format Check
+        run: terraform fmt -recursive
+
+  valdiate:
+    name: Terraform Valdiate
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.action == 'valdiate' }}
+    steps:
+      - run: echo "Running terraform valdiate"
+      - name: Terraform Valdiate
+        run: terraform valdiate
   plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.action == 'plan' }}
     steps:
       - run: echo "Running terraform plan"
+      - name: Terraform Plan
+        run: terraform plan
 
   apply:
     name: Terraform Apply
@@ -35,6 +58,8 @@ jobs:
     if: ${{ github.event.inputs.action == 'apply' }}
     steps:
       - run: echo "Running terraform apply"
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
 
   destroy:
     name: Terraform Destroy
@@ -42,3 +67,5 @@ jobs:
     if: ${{ github.event.inputs.action == 'destroy' }}
     steps:
       - run: echo "Running terraform destroy"
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
