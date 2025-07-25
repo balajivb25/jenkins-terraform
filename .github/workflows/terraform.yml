@@ -1,0 +1,44 @@
+name: Terraform Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Choose action to run'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - init
+          - plan
+          - apply
+          - destroy
+
+jobs:
+  init:
+    name: Terraform Init
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.action == 'init' }}
+    steps:
+      - run: echo "Running terraform init"
+
+  plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.action == 'plan' }}
+    steps:
+      - run: echo "Running terraform plan"
+
+  apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.action == 'apply' }}
+    steps:
+      - run: echo "Running terraform apply"
+
+  destroy:
+    name: Terraform Destroy
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.action == 'destroy' }}
+    steps:
+      - run: echo "Running terraform destroy"
