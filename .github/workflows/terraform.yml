@@ -15,11 +15,19 @@ on:
           - plan
           - apply
           - destroy
+      runner_type:
+        description: 'Choose the runner environment'
+        required: true
+        default: 'github-hosted'
+        type: choice
+        options:
+          - github-hosted
+          - self-hosted
 
 jobs:
   init:
     name: Terraform Init
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner_type == 'self-hosted' && 'self-hosted' || 'ubuntu-latest' }}
     if: ${{ github.event.inputs.action == 'init' }}
     steps:
       - run: echo "Running terraform init"
@@ -28,7 +36,7 @@ jobs:
 
   fmt:
     name: Terraform fmt
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner_type == 'self-hosted' && 'self-hosted' || 'ubuntu-latest' }}
     if: ${{ github.event.inputs.action == 'fmt' }}
     steps:
       - run: echo "Running terraform fmt"
@@ -37,7 +45,7 @@ jobs:
 
   valdiate:
     name: Terraform Valdiate
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner_type == 'self-hosted' && 'self-hosted' || 'ubuntu-latest' }}
     if: ${{ github.event.inputs.action == 'valdiate' }}
     steps:
       - run: echo "Running terraform valdiate"
@@ -45,7 +53,7 @@ jobs:
         run: terraform valdiate
   plan:
     name: Terraform Plan
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner_type == 'self-hosted' && 'self-hosted' || 'ubuntu-latest' }}
     if: ${{ github.event.inputs.action == 'plan' }}
     steps:
       - run: echo "Running terraform plan"
@@ -54,7 +62,7 @@ jobs:
 
   apply:
     name: Terraform Apply
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner_type == 'self-hosted' && 'self-hosted' || 'ubuntu-latest' }}
     if: ${{ github.event.inputs.action == 'apply' }}
     steps:
       - run: echo "Running terraform apply"
@@ -63,7 +71,7 @@ jobs:
 
   destroy:
     name: Terraform Destroy
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner_type == 'self-hosted' && 'self-hosted' || 'ubuntu-latest' }}
     if: ${{ github.event.inputs.action == 'destroy' }}
     steps:
       - run: echo "Running terraform destroy"
