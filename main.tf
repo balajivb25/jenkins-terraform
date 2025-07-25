@@ -1,5 +1,5 @@
 provider "aws" {
-  region = ap-south-1
+  region = "ap-south-1"
 }
 
 resource "aws_vpc" "vpc_trail_1" {
