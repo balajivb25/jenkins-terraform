@@ -5,7 +5,7 @@ on:
 
 jobs:
   destroy:
-    name: Destroy Terraform Resources
+    name: Terraform-Destroy
     runs-on: ubuntu-latest
 
     env:
