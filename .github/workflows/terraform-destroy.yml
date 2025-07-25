@@ -1,4 +1,4 @@
-name: Terraform Destroy
+name: Terraform-Destroy
 
 on:
   workflow_dispatch:  # Manual trigger from GitHub UI
