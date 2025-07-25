@@ -89,8 +89,8 @@ jobs:
           terraform_version: 1.6.6
       - name: Terraform Init
         run: terraform init
-      - name: Terraform Valdiate
-        run: terraform valdiate
+      - name: Terraform Validate
+        run: terraform validate
       - name: Terraform Plan
         run: terraform plan
 
@@ -108,8 +108,8 @@ jobs:
           terraform_version: 1.6.6
       - name: Terraform Init
         run: terraform init
-      - name: Terraform Valdiate
-        run: terraform valdiate
+      - name: Terraform Validate
+        run: terraform validate
       - name: Terraform Plan
         run: terraform plan
       - name: Terraform Apply
