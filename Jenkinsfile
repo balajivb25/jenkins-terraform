@@ -1,92 +1,77 @@
 pipeline {
   agent any
-  options { skipDefaultCheckout() } // don't auto-checkout pipeline repo
+
   parameters {
-    choice(name: 'ACTION', choices: ['init-plan', 'apply', 'destroy'],
-           description: 'What to do when started manually')
-    /*string(name: 'TF_REPO_URL', defaultValue: 'https://github.com/your-org/terraform-infra-repo.git',
-           description: 'Terraform repo to operate on')
-    string(name: 'TF_BRANCH', defaultValue: 'main', description: 'Branch to use')
-    string(name: 'TF_DIR', defaultValue: '.', description: 'Working dir inside Terraform repo')
-    booleanParam(name: 'AUTO_APPROVE', defaultValue: false, description: 'Auto-approve apply/destroy')*/
+    choice(name: 'ACTION', choices: ['init', 'plan', 'apply', 'destroy'], description: 'Terraform action to perform')
   }
 
-  /*environment {
-    GIT_CREDS = 'github-cred'  // your GitHub cred ID
-    AWS_CREDS = 'aws-creds'    // example cloud cred (if needed)
-  }*/
+  environment {
+    TF_DIR = "terraform"
+    TFSTATE_BACKUP = "terraform.tfstate.backup"
+    ARTIFACTS_DIR = "artifacts"   // folder inside Jenkins workspace for state backups
+  }
 
   stages {
-    /*stage('Resolve inputs') {
-      steps {
-        script {
-          // Values possibly supplied by webhook via Generic Webhook Trigger
-          // REF like "refs/heads/main" → branch is last token
-          def refFromHook   = env.REF ?: ''
-          def branchFromRef = refFromHook ? refFromHook.tokenize('/').last() : null
-
-          env.EFF_REPO   = env.TF_REPO_URL ?: params.TF_REPO_URL
-          env.EFF_BRANCH = branchFromRef ?: (env.TF_BRANCH ?: params.TF_BRANCH)
-          env.EFF_DIR    = env.TF_DIR ?: params.TF_DIR
-          env.EFF_ACTION = env.TF_ACTION ?: params.TF_ACTION
-          env.EFF_COMMIT = env.TF_COMMIT ?: ''  // head sha from webhook
-
-          echo ">> Using Repo=${env.EFF_REPO}"
-          echo ">> Branch=${env.EFF_BRANCH} Commit=${env.EFF_COMMIT}"
-          echo ">> Dir=${env.EFF_DIR} Action=${env.EFF_ACTION}"
-        }
-      }
-    }
-
-    stage('Checkout Terraform repo') {
-      steps {
-        script {
-          // Use Jenkins 'git' step for branches; if a specific COMMIT is provided,
-          // checkout branch first, then hard-checkout the commit.
-          // (git step supports branch, not bare SHA directly.) :contentReference[oaicite:7]{index=7}
-          if (env.EFF_COMMIT?.trim()) {
-            checkout([
-              $class: 'GitSCM',
-              branches: [[name: env.EFF_BRANCH]],
-              userRemoteConfigs: [[url: env.EFF_REPO, credentialsId: env.GIT_CREDS]]
-            ])
-            sh "git checkout -q ${env.EFF_COMMIT}"
-          } else {
-            git branch: env.EFF_BRANCH, url: env.EFF_REPO, credentialsId: env.GIT_CREDS
-          }
-        }
-      }
-    }
-*/
     stage('Checkout') {
-        steps {
-            git branch: 'main', url: 'https://github.com/balajivb25/jenkins-terraform.git'
-           }
-    }
-    stage('Show Terraform version') {
-      steps { sh 'terraform version' }
+      steps {
+        checkout scm
+      }
     }
 
-        stage('Terraform Action') {
-            steps {
-                script {
-                    dir('terraform') {
-                        if (params.ACTION == 'init-plan') {
-                            sh 'terraform init -input=false'
-                            sh 'terraform plan -out=tfplan'
-                        } /*else if (params.ACTION == 'apply') {
-                            sh 'terraform apply -auto-approve tfplan'
-                        } else if (params.ACTION == 'destroy') {
-                            sh 'terraform destroy -auto-approve'
-                        }*/
-                        else if (params.ACTION == 'apply') {
-                            sh 'terraform plan -out=tfplan'
-                        } else if (params.ACTION == 'destroy') {
-                            sh 'terraform plan -out=tfplan'
-                        }
-                    }
-                }
-            }
+    stage('Terraform Init') {
+      when { anyOf { environment name: 'ACTION', value: 'init'; environment name: 'ACTION', value: 'plan'; environment name: 'ACTION', value: 'apply'; environment name: 'ACTION', value: 'destroy' } }
+      steps {
+        dir(env.TF_DIR) {
+          sh "terraform init -input=false"
         }
+      }
     }
+
+    stage('Terraform Plan') {
+      when { environment name: 'ACTION', value: 'plan' }
+      steps {
+        dir(env.TF_DIR) {
+          sh "terraform plan -out=tfplan"
+        }
+      }
+    }
+
+    stage('Terraform Apply') {
+      when { environment name: 'ACTION', value: 'apply' }
+      steps {
+        dir(env.TF_DIR) {
+          sh "terraform apply -auto-approve tfplan || terraform apply -auto-approve"
+
+          // backup tfstate to artifacts
+          sh """
+            mkdir -p ../${ARTIFACTS_DIR}
+            cp terraform.tfstate ../${ARTIFACTS_DIR}/terraform.tfstate.\$(date +%F-%H-%M-%S)
+          """
+          archiveArtifacts artifacts: "${ARTIFACTS_DIR}/terraform.tfstate.*", fingerprint: true
+        }
+      }
+    }
+
+    stage('Terraform Destroy') {
+      when { environment name: 'ACTION', value: 'destroy' }
+      steps {
+        dir(env.TF_DIR) {
+          // restore last saved tfstate
+          sh """
+            if [ -f ../${ARTIFACTS_DIR}/terraform.tfstate.* ]; then
+              latest=\$(ls -t ../${ARTIFACTS_DIR}/terraform.tfstate.* | head -1)
+              cp \$latest terraform.tfstate
+            fi
+          """
+          sh "terraform destroy -auto-approve"
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      echo "Pipeline finished with ACTION=${params.ACTION}"
+    }
+  }
 }
