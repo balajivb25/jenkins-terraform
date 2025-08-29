@@ -19,11 +19,11 @@ pipeline {
         }
       }
     }
+  }
 
   post {
     always {
       echo "Pipeline finished with ACTION=INIT"
     }
   }
-}
 }
