@@ -12,8 +12,9 @@ pipeline {
       }
     }
 
-    stage('Terraform Init') {
+    stage('Terraform Plan') {
       steps {
+        withAWS(credentials: 'aws-creds', region: 'ap-south-1')
         dir(env.TF_DIR) {
           sh "terraform plan -out=tfplan"
         }
@@ -23,7 +24,7 @@ pipeline {
 
   post {
     always {
-      echo "Pipeline finished with ACTION=INIT"
+      echo "Pipeline finished"
     }
   }
 }
