@@ -15,7 +15,7 @@ pipeline {
     stage('Terraform Init') {
       steps {
         dir(env.TF_DIR) {
-          sh "terraform init -input=false"
+          sh "terraform plan -out=tfplan"
         }
       }
     }
