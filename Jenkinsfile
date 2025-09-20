@@ -22,7 +22,7 @@ pipeline {
     }
     stage('Save TFState to Shared Folder') {
       steps {
-        sh 'cp terraform/* /var/jenkins_shared/tfstate/*'
+        sh 'cp terraform/* /var/jenkins_shared/tfstate/'
       }
     }
 
