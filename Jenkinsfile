@@ -20,11 +20,13 @@ pipeline {
         }
       }
     }
-    stage('Archive TFState') {
-            steps {
-                archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
-            }
-        }
+    stage('Save TFState to Shared Folder') {
+      steps {
+        sh 'mkdir -p /var/jenkins_shared/tfstate/'
+        sh 'cp terraform/terraform.tfstate /var/jenkins_shared/tfstate/tf-ec2.tfstate'
+      }
+    }
+
   }
 
   post {
