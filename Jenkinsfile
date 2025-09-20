@@ -15,13 +15,14 @@ pipeline {
           dir(env.TF_DIR) {
             sh "terraform init -input=false"
             sh "terraform plan -out=tfplan"
+            sh "terraform apply -auto-approve"
           }
         }
       }
     }
     stage('Archive TFState') {
             steps {
-                archiveArtifacts artifacts: 'terraform.tfstate', fingerprint: true
+                archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
             }
         }
   }
