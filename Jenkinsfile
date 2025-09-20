@@ -26,8 +26,10 @@ pipeline {
           def tfOutput = readJSON file: "${env.TF_DIR}/tf_output.json"
           env.EC2_ID = tfOutput.ec2_id.value
           env.EC2_PUBLIC_IP = tfOutput.ec2_public_ip.value
+          env.WEB_URL = tfOutput.web_url.value
           echo "EC2 ID: ${env.EC2_ID}"
           echo "EC2 Public IP: ${env.EC2_PUBLIC_IP}"
+          echo "EC2 Web URL: ${env.WEB_URL}"
         }
       }
     }
