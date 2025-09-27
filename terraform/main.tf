@@ -60,7 +60,14 @@ resource "aws_security_group" "sg" {
   to_port     = 443
   protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
-}
+  }
+  ingress {
+  description = "Tomcat"
+  from_port   = 8080
+  to_port     = 8080
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  }
   egress {
     description = "All"
     from_port = 0
@@ -82,13 +89,26 @@ resource "aws_instance" "ubuntu" {
               #!/bin/bash
               sleep 30
               apt update -y
-              apt install -y python3 apache2 openssl
-              a2enmod ssl
-              a2ensite default-ssl
-              systemctl reload apache2
-              systemctl start apache2
-              systemctl enable apache2
-              echo "<h1>Hello from Terraform EC2</h1>" > /var/www/html/index.html
+              //apt install -y python3 apache2 openssl
+              //a2enmod ssl
+              //a2ensite default-ssl
+              //systemctl reload apache2
+              //systemctl start apache2
+              //systemctl enable apache2
+              //sudo apt install maven
+              //echo "<h1>Hello from Terraform EC2</h1>" > /var/www/html/index.html
+              sudo apt install openjdk-17-jdk -y
+              export JAVA_HOME=/path/to/your/jdk
+              export PATH=$JAVA_HOME/bin:$PATH
+              source ~/.profile
+              sudo tar xzvf apache-maven-3.8.9-bin.tar.gz -C /opt
+              sudo mv /opt/apache-maven-3.8.9 /opt/maven
+              export M2_HOME=/opt/maven
+              export PATH=$M2_HOME/bin:$PATH
+              source ~/.profile
+              sudo apt install git-all
+              git config --global user.name "balajivb25"
+              git config --global user.email "balajiv.b25@gmail.com"              
               EOF
 }
 
@@ -104,3 +124,4 @@ resource "aws_instance" "ubuntu" {
   //subnet_id      = aws_subnet.private_a.id
   //route_table_id = aws_route_table.public_rt.id
 //}
+
