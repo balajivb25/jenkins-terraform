@@ -4,6 +4,7 @@ pipeline {
   environment {
     TF_DIR = "terraform"
     AWS_REGION = "ap-south-1"
+    RUN_APPLY = "true"
   }
 
   tools {
@@ -48,7 +49,7 @@ pipeline {
 
     stage('Terraform Apply') {
       when {
-        expression { return params.APPLY_CHANGES == true }  // Optional manual control
+        expression { return env.RUN_APPLY == true }  // Optional manual control
       }
       steps {
         dir(env.TF_DIR) {
