@@ -3,24 +3,58 @@ pipeline {
 
   environment {
     TF_DIR = "terraform"
+    AWS_REGION = "ap-south-1"
   }
+
   tools {
     git 'Default'
   }
+
+  triggers {
+    githubPush()   // Automatically runs on GitHub push
+  }
+
   stages {
+
     stage('Checkout') {
       steps {
         checkout scm
       }
     }
 
-    stage('Terraform Init & Plan') {
+    stage('Terraform Init') {
       steps {
-        withAWS(credentials: 'aws-creds', region: 'ap-south-1'){
-          dir(env.TF_DIR) {
-            sh "terraform init -input=false"
-            sh "terraform plan -out=tfplan"
-            sh "terraform apply -auto-approve"
+        dir(env.TF_DIR) {
+          withAWS(credentials: 'aws-creds', region: env.AWS_REGION) {
+            sh 'terraform init -input=false'
+          }
+        }
+      }
+    }
+
+    stage('Terraform Plan') {
+      steps {
+        dir(env.TF_DIR) {
+          withAWS(credentials: 'aws-creds', region: env.AWS_REGION) {
+            sh 'terraform plan -out=tfplan'
+          }
+        }
+      }
+      post {
+        success {
+          archiveArtifacts artifacts: "${env.TF_DIR}/tfplan", fingerprint: true
+        }
+      }
+    }
+
+    stage('Terraform Apply') {
+      when {
+        expression { return params.APPLY_CHANGES == true }  // Optional manual control
+      }
+      steps {
+        dir(env.TF_DIR) {
+          withAWS(credentials: 'aws-creds', region: env.AWS_REGION) {
+            sh 'terraform apply -auto-approve tfplan'
           }
         }
       }
@@ -29,7 +63,10 @@ pipeline {
 
   post {
     always {
-      echo "Pipeline finished"
+      echo "✅ Pipeline finished"
+    }
+    failure {
+      echo "❌ Pipeline failed. Check logs in Jenkins console output."
     }
   }
 }
