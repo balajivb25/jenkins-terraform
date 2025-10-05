@@ -2,10 +2,13 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-# 1️⃣ Create public S3 bucket
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 resource "aws_s3_bucket" "public_bucket" {
-  bucket = "my-public-image-bucket"
-  
+  bucket = "my-public-image-bucket-${random_id.suffix.hex}"
+
   tags = {
     Name = "PublicImageBucket"
   }
@@ -24,11 +27,27 @@ resource "aws_s3_bucket_acl" "public_acl" {
   acl    = "public-read"
 }
 
-# 2️⃣ Upload GIF image
+resource "aws_s3_bucket_policy" "public_policy" {
+  bucket = aws_s3_bucket.public_bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "PublicReadGetObject"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = ["s3:GetObject"]
+        Resource  = ["${aws_s3_bucket.public_bucket.arn}/*"]
+      }
+    ]
+  })
+}
+
 resource "aws_s3_object" "gif_image" {
   bucket       = aws_s3_bucket.public_bucket.id
   key          = "my-image.gif"
-  source       = "${path.module}/my-image.gif"   # file in repo
+  source       = "${path.module}/my-image.gif"
   content_type = "image/gif"
-  acl          = "public-read"                   # make it public
+  acl          = "public-read"
 }
