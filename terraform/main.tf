@@ -32,8 +32,3 @@ resource "aws_s3_object" "gif_image" {
   content_type = "image/gif"
   acl          = "public-read"                   # make it public
 }
-
-# 3️⃣ Output public URL
-output "gif_url" {
-  value = "https://${aws_s3_bucket.public_bucket.bucket}.s3.amazonaws.com/${aws_s3_object.gif_image.key}"
-}
