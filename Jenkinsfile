@@ -57,6 +57,16 @@ pipeline {
         }
       }
     }
+    stage('Terraform Destory') {
+      steps {
+        input "Approve Terraform Destory?"
+        dir(env.TF_DIR) {
+          withAWS(credentials: 'aws-creds', region: env.AWS_REGION) {
+            sh 'terraform destory -auto-approve tfplan'
+          }
+        }
+      }
+    }
   }
 
   post {
