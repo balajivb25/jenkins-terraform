@@ -4,7 +4,9 @@ pipeline {
   environment {
     TF_DIR = "terraform"
   }
-
+  tools {
+    git 'Default'
+  }
   stages {
     stage('Checkout') {
       steps {
