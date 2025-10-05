@@ -1,8 +1,5 @@
-output "ec2_public_ip" {
-  value = aws_instance.ubuntu.public_ip
+output "image_url" {
+  value = "https://${aws_s3_bucket.public_bucket.bucket}.s3.amazonaws.com/${aws_s3_object.image.key}"
 }
-output "web_url" {
-  value = "http://${aws_instance.ubuntu.public_ip}"
 
-}
 
