@@ -31,7 +31,6 @@ pipeline {
         }
       }
     }
-
     stage('Terraform Plan') {
       steps {
         dir(env.TF_DIR) {
