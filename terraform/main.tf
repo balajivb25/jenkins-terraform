@@ -6,6 +6,7 @@ resource "random_id" "suffix" {
   byte_length = 4
 }
 
+# 1️⃣ Create S3 bucket
 resource "aws_s3_bucket" "public_bucket" {
   bucket = "my-public-image-bucket-${random_id.suffix.hex}"
 
@@ -14,6 +15,7 @@ resource "aws_s3_bucket" "public_bucket" {
   }
 }
 
+# 2️⃣ Disable public access block restrictions
 resource "aws_s3_bucket_public_access_block" "public_access" {
   bucket                  = aws_s3_bucket.public_bucket.id
   block_public_acls       = false
@@ -22,11 +24,7 @@ resource "aws_s3_bucket_public_access_block" "public_access" {
   restrict_public_buckets = false
 }
 
-resource "aws_s3_bucket_acl" "public_acl" {
-  bucket = aws_s3_bucket.public_bucket.id
-  acl    = "public-read"
-}
-
+# 3️⃣ Bucket policy for public read
 resource "aws_s3_bucket_policy" "public_policy" {
   bucket = aws_s3_bucket.public_bucket.id
 
@@ -44,10 +42,10 @@ resource "aws_s3_bucket_policy" "public_policy" {
   })
 }
 
+# 4️⃣ Upload GIF
 resource "aws_s3_object" "gif_image" {
   bucket       = aws_s3_bucket.public_bucket.id
   key          = "my-image.gif"
   source       = "${path.module}/my-image.gif"
   content_type = "image/gif"
-  acl          = "public-read"
 }
