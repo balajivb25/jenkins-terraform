@@ -48,10 +48,8 @@ pipeline {
     }
 
     stage('Terraform Apply') {
-      when {
-        expression { return env.RUN_APPLY == true }  // Optional manual control
-      }
       steps {
+        input "Approve Terraform Apply?"
         dir(env.TF_DIR) {
           withAWS(credentials: 'aws-creds', region: env.AWS_REGION) {
             sh 'terraform apply -auto-approve tfplan'
