@@ -41,37 +41,48 @@ resource "aws_security_group" "sg" {
   description = "Security group for trail-1"
   vpc_id      = aws_vpc.vpc_trail_1.id
 
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  #ingress {
+   # description = "SSH"
+   # from_port   = 22
+   # to_port     = 22
+   # protocol    = "tcp"
+   # cidr_blocks = ["0.0.0.0/0"]
+  #}
 
-  ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  #ingress {
+   # description = "HTTP"
+   # from_port   = 80
+   # to_port     = 80
+   # protocol    = "tcp"
+   # cidr_blocks = ["0.0.0.0/0"]
+  #}
 
-  ingress {
-    description = "HTTPS"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  #ingress {
+   # description = "HTTPS"
+   # from_port   = 443
+   # to_port     = 443
+   # protocol    = "tcp"
+   # cidr_blocks = ["0.0.0.0/0"]
+  #}
 
-  ingress {
+  #ingress {
+   # description = "Tomcat"
+   # from_port   = 8080
+   # to_port     = 8080
+   # protocol    = "tcp"
+   # cidr_blocks = ["0.0.0.0/0"]
+  #}
+
+dynamic "ingress" {
+  for_each = ["80","8080","443","22","1000","8443"]
+  content {
     description = "Tomcat"
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = ingress.value
+    to_port     = ingress.value
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
 
   egress {
     description = "All"
@@ -118,3 +129,4 @@ resource "aws_instance" "ubuntu" {
               systemctl start apache2
               EOF
 }
+
