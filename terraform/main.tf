@@ -1,7 +1,16 @@
 provider "aws" {
   region = "ap-south-1"
 }
-
+variable "ingress_rules" {
+  type = map(list(string))
+  default = {
+    "80"   = ["0.0.0.0/0"]          # HTTP
+    "8080" = ["10.0.0.0/16"]        # Internal eg
+    "443"  = ["0.0.0.0/0"]          # HTTPS 
+    "1000" = ["192.168.1.0/24"]     # Private eg
+    "8443" = ["172.16.0.0/12"]      # Restricted, if we want we can add SSH 22 port as well
+  }
+}
 resource "aws_vpc" "vpc_trail_1" {
   cidr_block = "10.0.0.0/24"
 
@@ -42,14 +51,6 @@ resource "aws_security_group" "sg" {
   vpc_id      = aws_vpc.vpc_trail_1.id
 
   #ingress {
-   # description = "SSH"
-   # from_port   = 22
-   # to_port     = 22
-   # protocol    = "tcp"
-   # cidr_blocks = ["0.0.0.0/0"]
-  #}
-
-  #ingress {
    # description = "HTTP"
    # from_port   = 80
    # to_port     = 80
@@ -72,17 +73,23 @@ resource "aws_security_group" "sg" {
    # protocol    = "tcp"
    # cidr_blocks = ["0.0.0.0/0"]
   #}
-
-dynamic "ingress" {
-  for_each = ["80","8080","443","22","1000","8443"]
-  content {
-    description = "Tomcat"
-    from_port   = ingress.value
-    to_port     = ingress.value
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
+  dynamic "ingress" {
+    for_each = var.ingress_rules
+    content {
+      description = "Allow port ${ingress.key}"
+      from_port   = tonumber(ingress.key)
+      to_port     = tonumber(ingress.key)
+      protocol    = "tcp"
+      cidr_blocks = ingress.value
+    }
+  }
 
   egress {
     description = "All"
@@ -129,4 +136,5 @@ resource "aws_instance" "ubuntu" {
               systemctl start apache2
               EOF
 }
+
 
