@@ -31,7 +31,7 @@ cat <<EOF > /var/www/html/index.html
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Terraform Ubuntu Test</title>
+  <title>ALB Ubuntu Test</title>
 </head>
 <body>
   <h1>Hello from Ec2 instance after ALB set-up</h1>
