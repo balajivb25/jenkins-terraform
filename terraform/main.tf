@@ -120,6 +120,7 @@ resource "aws_security_group" "alb_sg" {
       to_port     = tonumber(ingress.value)
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
+    }
   }
 
   egress {
@@ -179,4 +180,5 @@ resource "aws_lb_target_group_attachment" "ubuntu_instances" {
   target_id        = aws_instance.ubuntu[count.index].id
   port             = 80
 }
+
 
