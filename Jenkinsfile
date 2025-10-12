@@ -49,11 +49,17 @@ pipeline {
 
     stage('Terraform Apply') {
       steps {
-        input "Approve Terraform Apply?"
-        dir(env.TF_DIR) {
-          withAWS(credentials: 'aws-creds', region: env.AWS_REGION) {
-            sh 'terraform apply -auto-approve tfplan'
+        try {
+          input "Approve Terraform Apply?"
+          dir(env.TF_DIR) {
+            withAWS(credentials: 'aws-creds', region: env.AWS_REGION) {
+              sh 'terraform apply -auto-approve tfplan'
+              }
           }
+        } catch (Exception e) {
+            echo "Terraform apply failed: ${e}"
+            currentBuild.result = 'FAILURE'
+            error("Stopping pipeline due to Terraform failure")
         }
       }
     }
