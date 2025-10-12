@@ -34,7 +34,7 @@ cat <<EOF > /var/www/html/index.html
   <title>Terraform Ubuntu Test</title>
 </head>
 <body>
-  <h1>Hello from Terraform-deployed Ubuntu Instance!</h1>
+  <h1>Hello from Ec2 instance after ALB set-up</h1>
   <p>This is a simple test page to verify instance launch and web server setup.</p>
 </body>
 </html>
