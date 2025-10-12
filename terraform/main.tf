@@ -79,20 +79,21 @@ resource "aws_security_group" "sg" {
 }
 
 resource "aws_instance" "ubuntu" {
+  count         = 2
   ami           = "ami-0f918f7e67a3323f0"
   instance_type = "t3.micro"
   subnet_id     = aws_subnet.public_a.id
   vpc_security_group_ids = [aws_security_group.sg.id]
-  user_data = file("user_data.sh")
+  user_data     = file("user_data.sh")
   tags = {
-    Name = "ubuntu_trail_1"
+    Name = "ubuntu_trail_${count.index + 1}"  # Will create ubuntu_trail_1, ubuntu_trail_2
   }
   lifecycle {
     create_before_destroy = true
   }
-  # depends_on = [aws_instance.my_server_db, aws_instance.my_server_app] 
-  # it will create in sequence like db -> app -> ubuntu(web)
+  # depends_on = [aws_instance.my_server_db, aws_instance.my_server_app]
 }
+
 #resource "aws_instance" "my_server_app" {
 #  ami           = "ami-0f918f7e67a3323f0"
 #  instance_type = "t3.micro"
@@ -111,6 +112,7 @@ resource "aws_eip" "lb" {
     Name = "ubuntu_elastic_ip"
   }
 }
+
 
 
 
