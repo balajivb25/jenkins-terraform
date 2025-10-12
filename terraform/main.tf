@@ -106,13 +106,6 @@ resource "aws_instance" "ubuntu" {
 #  vpc_security_group_ids = [aws_security_group.sg.id]
 #}
 
-resource "aws_eip" "lb" {
-  instance = aws_instance.ubuntu.id
-  tags = {
-    Name = "ubuntu_elastic_ip"
-  }
-}
-
 #Security Group for ALB
 resource "aws_security_group" "alb_sg" {
   name        = "alb_sg"
@@ -122,7 +115,7 @@ resource "aws_security_group" "alb_sg" {
   dynamic "ingress" {
     for_each = ["80", "443"]
     content {
-      description = "Allow port $(ingress.value)"
+      description = "Allow port ${ingress.value}"
       from_port   = tonumber(ingress.value)
       to_port     = tonumber(ingress.value)
       protocol    = "tcp"
@@ -186,3 +179,4 @@ resource "aws_lb_target_group_attachment" "ubuntu_instances" {
   target_id        = aws_instance.ubuntu[count.index].id
   port             = 80
 }
+
