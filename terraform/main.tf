@@ -90,7 +90,20 @@ resource "aws_instance" "ubuntu" {
   lifecycle {
     create_before_destroy = true
   }
+  # depends_on = [aws_instance.my_server_db, aws_instance.my_server_app] 
+  # it will create in sequence like db -> app -> ubuntu(web)
 }
+#resource "aws_instance" "my_server_app" {
+#  ami           = "ami-0f918f7e67a3323f0"
+#  instance_type = "t3.micro"
+#  vpc_security_group_ids = [aws_security_group.sg.id]
+# depends_on = [aws_instance.my_server_db]
+#}
+#resource "aws_instance" "my_server_db" {
+#  ami           = "ami-0f918f7e67a3323f0"
+#  instance_type = "t3.micro"
+#  vpc_security_group_ids = [aws_security_group.sg.id]
+#}
 
 resource "aws_eip" "lb" {
   instance = aws_instance.ubuntu.id
@@ -98,5 +111,6 @@ resource "aws_eip" "lb" {
     Name = "ubuntu_elastic_ip"
   }
 }
+
 
 
