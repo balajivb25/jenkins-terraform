@@ -103,6 +103,9 @@ resource "aws_instance" "ubuntu" {
     create_before_destroy = true
   }
   # depends_on = [aws_instance.my_server_db, aws_instance.my_server_app]
+  triggers = {
+    user_data_sha = sha1(file("user_data.sh"))
+  }
 }
 
 #resource "aws_instance" "my_server_app" {
@@ -191,6 +194,7 @@ resource "aws_lb_target_group_attachment" "ubuntu_instances" {
   target_id        = aws_instance.ubuntu[count.index].id
   port             = 80
 }
+
 
 
 
