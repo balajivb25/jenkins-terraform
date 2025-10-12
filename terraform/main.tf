@@ -28,6 +28,13 @@ resource "aws_subnet" "public_a" {
 
   tags = { Name = "public_a" }
 }
+resource "aws_subnet" "public_b" {
+  vpc_id                  = aws_vpc.vpc_trail_1.id
+  cidr_block              = "10.0.0.0/28"
+  map_public_ip_on_launch = true
+  availability_zone       = "ap-south-1b"
+  tags = { Name = "public_b" }
+}
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc_trail_1.id
@@ -44,6 +51,10 @@ resource "aws_route_table" "public_rt" {
 
 resource "aws_route_table_association" "public_a" {
   subnet_id      = aws_subnet.public_a.id
+  route_table_id = aws_route_table.public_rt.id
+}
+resource "aws_route_table_association" "public_b" {
+  subnet_id      = aws_subnet.public_b.id
   route_table_id = aws_route_table.public_rt.id
 }
 
@@ -156,7 +167,7 @@ resource "aws_lb" "ubuntu_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = [aws_subnet.public_a.id]
+  subnets            = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 
   enable_deletion_protection = false
 }
@@ -180,5 +191,6 @@ resource "aws_lb_target_group_attachment" "ubuntu_instances" {
   target_id        = aws_instance.ubuntu[count.index].id
   port             = 80
 }
+
 
 
