@@ -23,14 +23,14 @@ resource "aws_vpc" "vpc_trail_1" {
 
 resource "aws_subnet" "public_a" {
   vpc_id                  = aws_vpc.vpc_trail_1.id
-  cidr_block              = "10.0.0.0/26"
+  cidr_block              = "10.0.0.0/28"
   map_public_ip_on_launch = true
   availability_zone       = "ap-south-1a"
   tags = { Name = "public_a" }
 }
 resource "aws_subnet" "public_b" {
   vpc_id                  = aws_vpc.vpc_trail_1.id
-  cidr_block              = "10.0.0.64/26"
+  cidr_block              = "10.0.0.16/28"
   map_public_ip_on_launch = true
   availability_zone       = "ap-south-1b"
   tags = { Name = "public_b" }
@@ -191,6 +191,7 @@ resource "aws_lb_target_group_attachment" "ubuntu_instances" {
   target_id        = aws_instance.ubuntu[count.index].id
   port             = 80
 }
+
 
 
 
