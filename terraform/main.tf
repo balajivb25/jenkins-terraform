@@ -113,6 +113,76 @@ resource "aws_eip" "lb" {
   }
 }
 
+#Security Group for ALB
+resource "aws_security_group" "alb_sg" {
+  name        = "alb_sg"
+  description = "Allow HTTP/HTTPS to ALB"
+  vpc_id      = aws_vpc.vpc_trail_1.id
 
+  dynamic "ingress" {
+    for_each = ["80", "443"]
+    content {
+      description = "Allow port $(ingress.value)"
+      from_port   = tonumber(ingress.value)
+      to_port     = tonumber(ingress.value)
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+  }
 
+  egress {
+    description = "All"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
+#Create target Group
+resource "aws_lb_target_group" "ubuntu_tg" {
+  name     = "ubuntu-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.vpc_trail_1.id
+  target_type = "instance"
+
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+}
+
+#Create Application Load Balancer
+resource "aws_lb" "ubuntu_alb" {
+  name               = "ubuntu-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg.id]
+  subnets            = [aws_subnet.public_a.id]
+
+  enable_deletion_protection = false
+}
+
+#Create Listener
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.ubuntu_alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ubuntu_tg.arn
+  }
+}
+
+#Register EC2 Instances with Target Group
+resource "aws_lb_target_group_attachment" "ubuntu_instances" {
+  count            = 2
+  target_group_arn = aws_lb_target_group.ubuntu_tg.arn
+  target_id        = aws_instance.ubuntu[count.index].id
+  port             = 80
+}
