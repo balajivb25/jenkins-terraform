@@ -1,6 +1,7 @@
 provider "aws" {
   region = "ap-south-1"
 }
+
 variable "ingress_rules" {
   type = map(list(string))
   default = {
@@ -11,6 +12,7 @@ variable "ingress_rules" {
     "8443" = ["172.16.0.0/12"]      # Restricted, if we want we can add SSH 22 port as well
   }
 }
+
 resource "aws_vpc" "vpc_trail_1" {
   cidr_block = "10.0.0.0/24"
 
@@ -50,29 +52,6 @@ resource "aws_security_group" "sg" {
   description = "Security group for trail-1"
   vpc_id      = aws_vpc.vpc_trail_1.id
 
-  #ingress {
-   # description = "HTTP"
-   # from_port   = 80
-   # to_port     = 80
-   # protocol    = "tcp"
-   # cidr_blocks = ["0.0.0.0/0"]
-  #}
-
-  #ingress {
-   # description = "HTTPS"
-   # from_port   = 443
-   # to_port     = 443
-   # protocol    = "tcp"
-   # cidr_blocks = ["0.0.0.0/0"]
-  #}
-
-  #ingress {
-   # description = "Tomcat"
-   # from_port   = 8080
-   # to_port     = 8080
-   # protocol    = "tcp"
-   # cidr_blocks = ["0.0.0.0/0"]
-  #}
   ingress {
     description = "SSH"
     from_port   = 22
@@ -90,7 +69,6 @@ resource "aws_security_group" "sg" {
       cidr_blocks = ingress.value
     }
   }
-
   egress {
     description = "All"
     from_port   = 0
@@ -105,13 +83,20 @@ resource "aws_instance" "ubuntu" {
   instance_type = "t3.micro"
   subnet_id     = aws_subnet.public_a.id
   vpc_security_group_ids = [aws_security_group.sg.id]
-
+  user_data = file("user_data.sh")
   tags = {
     Name = "ubuntu_trail_1"
   }
-
-  user_data = file("user_data.sh")
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
+resource "aws_eip" "lb" {
+  instance = aws_instance.ubuntu.id
+  tags = {
+    Name = "ubuntu_elastic_ip"
+  }
+}
 
 
