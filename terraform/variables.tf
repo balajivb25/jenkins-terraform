@@ -8,4 +8,5 @@ variable "instance_type" {
 
 variable "key_pair_name" {
   description = "Existing EC2 key pair name (create in AWS Console)"
+  default     = null
 }
