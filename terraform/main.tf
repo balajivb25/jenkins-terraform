@@ -133,8 +133,8 @@ resource "aws_security_group_rule" "allow_http_from_alb" {
   from_port                = 80
   to_port                  = 80
   protocol                 = "tcp"
-  source_security_group_id = aws_security_group.alb_sg.id
-  security_group_id        = aws_security_group.ec2_sg.id
+  source_security_group_id = aws_security_group.web_sg.id
+  security_group_id        = aws_security_group.web_sg.id
 }
 
 
@@ -249,6 +249,7 @@ resource "aws_autoscaling_policy" "cpu_target" {
     target_value = 50.0
   }
 }
+
 
 
 
