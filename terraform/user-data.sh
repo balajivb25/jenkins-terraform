@@ -1,6 +1,6 @@
 #!/bin/bash
-yum update -y
-yum install -y httpd
-echo "Hello from $(hostname -f)" > /var/www/html/index.html
-systemctl enable httpd
-systemctl start httpd
+sudo yum update -y
+sudo yum install -y httpd
+sudo systemctl enable httpd
+sudo systemctl start httpd
+echo "<h1>Welcome to ALB Test</h1>" > /var/www/html/index.html
