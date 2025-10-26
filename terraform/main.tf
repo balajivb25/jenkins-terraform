@@ -135,7 +135,7 @@ resource "aws_launch_template" "web_lt" {
   name_prefix   = "web-lt-"
   image_id      = data.aws_ami.amazon_linux.id
   instance_type = var.instance_type
-  key_name      = var.key_pair_name
+  key_name = var.key_pair_name != null ? var.key_pair_name : null
 
   vpc_security_group_ids = [aws_security_group.web_sg.id]
   user_data              = base64encode(file("${path.module}/user-data.sh"))
@@ -237,3 +237,4 @@ resource "aws_autoscaling_policy" "cpu_target" {
     target_value = 50.0
   }
 }
+
