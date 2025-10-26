@@ -138,7 +138,7 @@ resource "aws_launch_template" "web_lt" {
   key_name = var.key_pair_name != null ? var.key_pair_name : null
 
   vpc_security_group_ids = [aws_security_group.web_sg.id]
-  user_data              = base64encode(file("${path.module}/user-data.sh"))
+  user_data              = base64encode(file("${path.module}/terraform/user-data.sh"))
 
   tag_specifications {
     resource_type = "instance"
@@ -237,4 +237,5 @@ resource "aws_autoscaling_policy" "cpu_target" {
     target_value = 50.0
   }
 }
+
 
