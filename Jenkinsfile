@@ -3,6 +3,7 @@ pipeline {
 
   environment {
     TF_DIR = "terraform"
+    TF_PLUGIN_CACHE_DIR = "${WORKSPACE}/.terraform.d/plugin-cache"
     AWS_REGION = "ap-south-1"
     RUN_APPLY = "true"
   }
@@ -26,8 +27,17 @@ pipeline {
     stage('Terraform Init') {
       steps {
         dir(env.TF_DIR) {
-          withAWS(credentials: 'aws-creds', region: env.AWS_REGION) {
-            sh 'terraform init -input=false'
+          script {
+            if (fileExists('.terraform')) {
+              echo "Terraform already initialized — skipping init."
+            } else {
+              withAWS(credentials: 'aws-creds', region: env.AWS_REGION) {
+                sh '''
+                  mkdir -p $TF_PLUGIN_CACHE_DIR
+                  terraform init -input=false
+                '''
+              }
+            }
           }
         }
       }
@@ -52,7 +62,7 @@ pipeline {
         input "Approve Terraform Apply?"
         dir(env.TF_DIR) {
           withAWS(credentials: 'aws-creds', region: env.AWS_REGION) {
-            sh 'terraform apply -auto-approve tfplan'
+            sh 'terraform apply -auto-approve tfplan -parallelism=20'
           }
         }
       }
